@@ -29,23 +29,25 @@ class User(UserBase):
         from_attributes = True
 
 
-class VideoBase(BaseModel):
-    title: str
-    description: Optional[str] = None
+class GenerationJobBase(BaseModel):
+    prompt: Optional[str] = None # Make prompt optional since Face Swap doesn't strictly need text prompt
+    media_type: str = "video"
+    provider: str = "piapi"
+    model_used: str = "kling3"
+    extra_inputs: Optional[dict] = None # For image_url, face_image_url, audio_url, etc.
 
 
-class VideoCreate(VideoBase):
+class GenerationJobCreate(GenerationJobBase):
     pass
 
 
-class Video(VideoBase):
+class GenerationJob(GenerationJobBase):
     id: int
     user_id: int
     status: str
-    video_url: Optional[str] = None
+    provider_job_id: Optional[str] = None
+    result_url: Optional[str] = None
     thumbnail_url: Optional[str] = None
-    duration: Optional[int] = None
-    file_size: Optional[int] = None
     created_at: datetime
     updated_at: datetime
 

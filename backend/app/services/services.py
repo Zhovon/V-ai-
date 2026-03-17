@@ -1,6 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.repositories.repositories import UserRepository, VideoRepository
-from app.schemas.schemas import UserCreate, VideoCreate, User, Video
+from app.repositories.repositories import UserRepository, GenerationJobRepository
+from app.schemas.schemas import UserCreate, GenerationJobCreate, User, GenerationJob
 from app.core.security import verify_password
 from typing import Optional
 
@@ -25,21 +25,21 @@ class UserService:
         return await self.repository.get_by_id(user_id)
 
 
-class VideoService:
+class GenerationJobService:
     def __init__(self, db: AsyncSession):
-        self.repository = VideoRepository(db)
+        self.repository = GenerationJobRepository(db)
 
-    async def create_video(self, video: VideoCreate, user_id: int) -> Video:
-        return await self.repository.create(video, user_id)
+    async def create_job(self, job: GenerationJobCreate, user_id: int) -> GenerationJob:
+        return await self.repository.create(job, user_id)
 
-    async def get_video(self, video_id: int) -> Optional[Video]:
-        return await self.repository.get_by_id(video_id)
+    async def get_job(self, job_id: int) -> Optional[GenerationJob]:
+        return await self.repository.get_by_id(job_id)
 
-    async def get_user_videos(self, user_id: int):
-        return await self.repository.get_user_videos(user_id)
+    async def get_user_jobs(self, user_id: int):
+        return await self.repository.get_user_jobs(user_id)
 
-    async def update_video_status(self, video_id: int, status: str) -> Optional[Video]:
+    async def update_job_status(self, job_id: int, status: str, result_url: str = None, provider_job_id: str = None) -> Optional[GenerationJob]:
         valid_statuses = ["pending", "processing", "completed", "failed"]
         if status not in valid_statuses:
             raise ValueError(f"Invalid status. Must be one of {valid_statuses}")
-        return await self.repository.update_status(video_id, status)
+        return await self.repository.update_status(job_id, status, result_url, provider_job_id)

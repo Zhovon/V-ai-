@@ -11,7 +11,7 @@ class Settings(BaseSettings):
     # API
     API_V1_PREFIX: str = "/api/v1"
     
-    # Database (SQLite for development)
+    # Database (SQLite for development / hardened local)
     DATABASE_URL: str = "sqlite+aiosqlite:///./videosaas.db"
     
     # Redis (optional)
@@ -23,8 +23,14 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
     
-    # CORS
-    ALLOWED_ORIGINS: List[str] = ["http://localhost:3000", "http://localhost:8000"]
+    FRONTEND_URL: str | None = None
+    
+    @property
+    def allowed_origins_list(self) -> List[str]:
+        origins = ["http://localhost:3000", "http://localhost:8000"]
+        if self.FRONTEND_URL:
+            origins.append(self.FRONTEND_URL)
+        return origins
     
     # Environment
     ENVIRONMENT: str = "development"

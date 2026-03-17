@@ -17,9 +17,9 @@ const apiClient = {
       }
     }
     
-    const headers: HeadersInit = {
+    const headers: Record<string, string> = {
       'Content-Type': 'application/json',
-      ...options.headers,
+      ...(options.headers as Record<string, string>),
     }
     
     // Add Authorization header if token exists
@@ -33,6 +33,10 @@ const apiClient = {
     })
 
     if (!response.ok) {
+      if (response.status === 401 && typeof window !== 'undefined') {
+        localStorage.removeItem('auth-storage')
+        window.location.href = '/auth/login'
+      }
       throw new Error(`API Error: ${response.status}`)
     }
 

@@ -1,7 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
-from app.models.models import User, Video
-from app.schemas.schemas import UserCreate, VideoCreate
+from app.models.models import User, GenerationJob
+from app.schemas.schemas import UserCreate, GenerationJobCreate
 from app.core.security import get_password_hash
 from typing import Optional
 
@@ -41,37 +41,43 @@ class UserRepository:
         return result.scalar_one_or_none()
 
 
-class VideoRepository:
+class GenerationJobRepository:
     def __init__(self, db: AsyncSession):
         self.db = db
 
-    async def create(self, video: VideoCreate, user_id: int) -> Video:
-        db_video = Video(
+    async def create(self, job: GenerationJobCreate, user_id: int) -> GenerationJob:
+        db_job = GenerationJob(
             user_id=user_id,
-            title=video.title,
-            description=video.description,
+            prompt=job.prompt,
+            media_type=job.media_type,
+            provider=job.provider,
+            model_used=job.model_used,
         )
-        self.db.add(db_video)
+        self.db.add(db_job)
         await self.db.commit()
-        await self.db.refresh(db_video)
-        return db_video
+        await self.db.refresh(db_job)
+        return db_job
 
-    async def get_by_id(self, video_id: int) -> Optional[Video]:
+    async def get_by_id(self, job_id: int) -> Optional[GenerationJob]:
         result = await self.db.execute(
-            select(Video).where(Video.id == video_id)
+            select(GenerationJob).where(GenerationJob.id == job_id)
         )
         return result.scalar_one_or_none()
 
-    async def get_user_videos(self, user_id: int):
+    async def get_user_jobs(self, user_id: int):
         result = await self.db.execute(
-            select(Video).where(Video.user_id == user_id)
+            select(GenerationJob).where(GenerationJob.user_id == user_id)
         )
         return result.scalars().all()
 
-    async def update_status(self, video_id: int, status: str) -> Optional[Video]:
-        video = await self.get_by_id(video_id)
-        if video:
-            video.status = status
+    async def update_status(self, job_id: int, status: str, result_url: str = None, provider_job_id: str = None) -> Optional[GenerationJob]:
+        job = await self.get_by_id(job_id)
+        if job:
+            job.status = status
+            if result_url:
+                job.result_url = result_url
+            if provider_job_id:
+                job.provider_job_id = provider_job_id
             await self.db.commit()
-            await self.db.refresh(video)
-        return video
+            await self.db.refresh(job)
+        return job

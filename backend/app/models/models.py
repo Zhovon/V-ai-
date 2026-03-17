@@ -17,17 +17,18 @@ class User(Base):
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
 
-class Video(Base):
-    __tablename__ = "videos"
+class GenerationJob(Base):
+    __tablename__ = "generation_jobs"
 
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, index=True)
-    title = Column(String)
-    description = Column(String)
+    prompt = Column(String)
+    media_type = Column(String)  # image, video
+    provider = Column(String)    # piapi, fal
+    model_used = Column(String)  # zimage, wan2.1, kling3
     status = Column(String, default="pending")  # pending, processing, completed, failed
-    video_url = Column(String)
-    thumbnail_url = Column(String)
-    duration = Column(Integer)  # in seconds
-    file_size = Column(Integer)  # in bytes
+    provider_job_id = Column(String, index=True, nullable=True)
+    result_url = Column(String, nullable=True)
+    thumbnail_url = Column(String, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
